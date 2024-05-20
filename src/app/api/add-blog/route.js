@@ -16,7 +16,7 @@ export async function POST(req) {
     //   return;
     // }
 
-    const newBlogData = req.json();
+    const newBlogData = await req.json();
 
     const { title, description } = newBlogData;
 
