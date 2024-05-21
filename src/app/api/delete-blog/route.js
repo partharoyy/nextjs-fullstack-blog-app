@@ -1,39 +1,27 @@
 import connectDB from '@/database';
 import Blog from '@/models/blog';
-import Joi from 'joi';
 import { NextResponse } from 'next/server';
 
-const AddNewBlog = Joi.object({
-  title: Joi.string().required(),
-  description: Joi.string().required(),
-});
-
-export async function POST(req) {
+export async function DELETE(req) {
   try {
     await connectDB();
 
-    const newBlogData = await req.json();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
 
-    const { title, description } = newBlogData;
-
-    const { error } = AddNewBlog.validate({
-      title,
-      description,
-    });
-
-    if (error) {
+    if (!id) {
       return NextResponse.json({
         success: false,
-        message: error.details[0].message,
+        message: 'Blog ID is required',
       });
     }
 
-    const newlyCreatedBlogItem = await Blog.create(newBlogData);
+    const deleteCurrentBlog = await Blog.findByIdAndDelete(id);
 
-    if (newlyCreatedBlogItem) {
+    if (deleteCurrentBlog) {
       return NextResponse.json({
         success: true,
-        message: 'Blog added successfully',
+        message: 'Blog has been deleted successfully',
       });
     } else {
       return NextResponse.json({
