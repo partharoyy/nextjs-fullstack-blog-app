@@ -11,7 +11,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-function AddNewBlog({ openBlogDialog, setOpenBlogDialog, handleSaveNewBlog, loading, formData, setFormData }) {
+function AddNewBlog({
+  openBlogDialog,
+  setOpenBlogDialog,
+  handleSaveNewBlog,
+  loading,
+  formData,
+  setFormData,
+  toBeUpdatedBlogId,
+  setToBeUpdatedBlogId,
+}) {
   return (
     <>
       <div>
@@ -25,11 +34,12 @@ function AddNewBlog({ openBlogDialog, setOpenBlogDialog, handleSaveNewBlog, load
             title: '',
             description: '',
           });
+          setToBeUpdatedBlogId(null);
         }}
       >
         <DialogContent className='sm:max-w-[425px]'>
           <DialogHeader>
-            <DialogTitle>Add New Blog</DialogTitle>
+            <DialogTitle>{toBeUpdatedBlogId ? 'Edit Blog' : 'Add New Blog'}</DialogTitle>
           </DialogHeader>
           <div className='grid gap-4 py-4'>
             <div className='grid grid-cols-4 items-center gap-4'>

@@ -5,7 +5,6 @@ import AddNewBlog from '../add-new-blog';
 import { Card, CardContent, CardDescription, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
-import { NextResponse } from 'next/server';
 
 const initialFormData = {
   title: '',
@@ -16,6 +15,7 @@ function BlogOverview({ blogList }) {
   const [openBlogDialog, setOpenBlogDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [toBeUpdatedBlogId, setToBeUpdatedBlogId] = useState(null);
 
   const router = useRouter();
 
@@ -23,13 +23,28 @@ function BlogOverview({ blogList }) {
     router.refresh();
   }, []);
 
+  function handleUpdateBlog(blog) {
+    setToBeUpdatedBlogId(blog._id);
+    setFormData({
+      title: blog?.title,
+      description: blog?.description,
+    });
+    setOpenBlogDialog(true);
+  }
+
   async function handleSaveNewBlog() {
     try {
       setLoading(true);
-      const apiResponse = await fetch('/api/add-blog', {
-        method: 'POST',
-        body: JSON.stringify(formData),
-      });
+      const apiResponse =
+        toBeUpdatedBlogId !== null
+          ? await fetch(`/api/update-blog?id=${toBeUpdatedBlogId}`, {
+              method: 'PUT',
+              body: JSON.stringify(formData),
+            })
+          : await fetch('/api/add-blog', {
+              method: 'POST',
+              body: JSON.stringify(formData),
+            });
 
       const result = await apiResponse.json();
       if (result?.success) {
@@ -37,6 +52,7 @@ function BlogOverview({ blogList }) {
         setFormData(formData);
         setOpenBlogDialog(false);
         setLoading(false);
+        setToBeUpdatedBlogId(null);
       }
     } catch (error) {
       console.log(error);
@@ -68,6 +84,8 @@ function BlogOverview({ blogList }) {
         formData={formData}
         setFormData={setFormData}
         handleSaveNewBlog={handleSaveNewBlog}
+        toBeUpdatedBlogId={toBeUpdatedBlogId}
+        setToBeUpdatedBlogId={setToBeUpdatedBlogId}
       />
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-5 gap-6'>
         {blogList && blogList.length > 0 ? (
@@ -77,7 +95,7 @@ function BlogOverview({ blogList }) {
                 <CardTitle>{blog.title}</CardTitle>
                 <CardDescription>{blog.description}</CardDescription>
                 <div className='flex items-center mt-5 gap-5'>
-                  <Button>Edit</Button>
+                  <Button onClick={() => handleUpdateBlog(blog)}>Edit</Button>
                   <Button onClick={() => handleDeleteBlog(blog._id)}>Delete</Button>
                 </div>
               </CardContent>
